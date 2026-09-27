@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">kotlin3</string>
+    <string name="welcome">Добро пожаловать в Bluetooth-чат!</string>
+    <string name="enter_new_name">Введите имя для чата</string>
+    <string name="selected_all">Выбрать всё</string>
+    <string name="PC">PC</string>
+    <string name="phone">Телефон</string>
+    <string name="tablet">Планшет</string>
+    <string name="enter_in_app">Войти</string>
+    <string name="input_name">Введите никнейм</string>
+</resources>

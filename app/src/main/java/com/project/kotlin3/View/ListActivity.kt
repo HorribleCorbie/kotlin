@@ -19,6 +19,7 @@ class ListActivity : AppCompatActivity() {
     lateinit var binding: ActivityListChatsBinding
     var isNotSelectAll = false
 
+    //4 лаба: вариант 1 и 2
     companion object {
         var list = mutableMapOf(
             "user1" to User("user1", TypeUser.PC),
@@ -54,13 +55,14 @@ class ListActivity : AppCompatActivity() {
         binding.selectAll.setOnCheckedChangeListener { _, isChecked ->
             if (binding.selectAll.isChecked) {
                 listCheckBox.forEach { it.isChecked = isChecked }
-            } else if (isNotSelectAll) {
+            } else if (!isNotSelectAll) {
                 listCheckBox.forEach { it.isChecked = false }
             }
-
             printChats()
         }
+
         binding.selectAll.isChecked = true
+        updateSelectAll()
 
         listCheckBox.forEach {
             it.setOnCheckedChangeListener { _, _ ->

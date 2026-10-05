@@ -1,5 +1,6 @@
 package com.project.kotlin3.View
 
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
@@ -13,13 +14,15 @@ import com.project.kotlin3.TypeUser
 import com.project.kotlin3.User
 import com.project.kotlin3.databinding.ActivityListChatsBinding
 import androidx.core.graphics.toColorInt
+import androidx.core.view.get
 import androidx.core.widget.TextViewCompat
+import com.project.kotlin3.UserRepository
+import com.project.kotlin3.UserRepository.currentUser
 
 class ListActivity : AppCompatActivity() {
     lateinit var binding: ActivityListChatsBinding
     var isNotSelectAll = false
 
-    //4 лаба: вариант 1 и 2
     companion object {
         var list = mutableMapOf(
             "user1" to User("user1", TypeUser.PC),
@@ -42,9 +45,39 @@ class ListActivity : AppCompatActivity() {
         binding = ActivityListChatsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-//        val intent = getIntent()
-//        val nickname = intent.getStringExtra("name") ?: "Undefined"
-//        list[nickname] = User(nickname, TypeUser.Phone)
+
+
+        if (currentUser==null) {
+            val intent = getIntent()
+            val nickname = intent.getStringExtra("name") ?: "Undefined"
+            UserRepository.init(nickname, TypeUser.Phone)
+        }
+
+
+        binding.bottomNavigation.menu[1].isChecked = true
+
+        binding.bottomNavigation.setOnItemSelectedListener {
+            when(it.itemId) {
+                R.id.logout -> {
+                    val intend = Intent(this, MainActivity::class.java)
+                    intend.putExtra("name", currentUser?.name)
+                    startActivity(intend)
+                    finish()
+                    true
+                }
+                R.id.home -> {
+                    true
+                }
+                R.id.account -> {
+                    val intend = Intent(this, AccountActivity::class.java)
+                    startActivity(intend)
+                    true
+                }
+                else -> {
+                    false
+                }
+            }
+        }
 
         val listCheckBox = listOf(
             binding.selectPC,

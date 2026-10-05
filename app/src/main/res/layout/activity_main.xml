@@ -13,6 +13,7 @@
         android:layout_height="729dp"
         android:gravity="center"
         android:orientation="vertical"
+        android:visibility="visible"
         app:flow_horizontalGap="10dp"
         app:flow_verticalGap="10dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -36,7 +37,7 @@
             android:layout_marginBottom="10dp"
             android:autofillHints=""
             android:background="@drawable/rounded_edittext"
-            android:backgroundTint="#37597B"
+            android:backgroundTint="@color/details"
             android:backgroundTintMode="src_in"
             android:ems="10"
             android:gravity="center"
@@ -49,8 +50,8 @@
             android:id="@+id/enter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/enter_in_app"
-            app:cornerRadius="10dp" />
+            android:background="@drawable/rounded_edittext"
+            android:text="@string/enter_in_app" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

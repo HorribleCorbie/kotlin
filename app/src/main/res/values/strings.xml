@@ -8,4 +8,11 @@
     <string name="tablet">Планшет</string>
     <string name="enter_in_app">Войти</string>
     <string name="input_name">Введите никнейм</string>
+    <string name="home">Начало</string>
+    <string name="notify">Уведомления</string>
+    <string name="account">Аккаунт</string>
+    <string name="logout">Выйти</string>
+    <string name="nickname">Никнейм</string>
+    <string name="save_account">Сохранить</string>
+    <string name="device_type">Тип\nустройства</string>
 </resources>

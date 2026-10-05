@@ -12,6 +12,7 @@ import com.project.kotlin3.databinding.ActivityMainBinding
 //I2 – CheckBox
 //L1 – Linear
 //O4 – ScrollView
+//4 лаба: вариант N1 – Bottom Navigation View и T2 – Из других окон в начальное
 
 class MainActivity : AppCompatActivity() {
 
@@ -20,8 +21,15 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        binding = ActivityMainBinding.inflate(getLayoutInflater())
+        binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.getRoot())
+
+        val intent = getIntent()
+        val nickname = intent.getStringExtra("name") ?: ""
+
+        if (nickname!=""){
+            binding.enterName.setText(nickname)
+        }
 
         binding.enter.setOnClickListener {
             try {
@@ -41,12 +49,12 @@ class MainActivity : AppCompatActivity() {
                 finish()
             } catch (e: NullPointerException) {
                 Toast.makeText(
-                    this@MainActivity, "Введите уникальный никнейм не более 50 символов",
+                    this, "Введите уникальный никнейм не более 50 символов",
                     Toast.LENGTH_SHORT
                 ).show()
             }catch (e: IllegalArgumentException){
                 Toast.makeText(
-                    this@MainActivity, "Такой никнейм уже занят",
+                    this, "Такой никнейм уже занят",
                     Toast.LENGTH_SHORT
                 ).show()
             }

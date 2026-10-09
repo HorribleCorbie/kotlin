@@ -59,6 +59,10 @@ class AccountActivity : AppCompatActivity() {
 
                 currentUser?.change(name, type)
 
+                Toast.makeText(
+                    this, "Сохранено",
+                    Toast.LENGTH_SHORT
+                ).show()
                 val intend = Intent(this, ListActivity::class.java)
                 startActivity(intend)
                 finish()

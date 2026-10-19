@@ -22,11 +22,11 @@ object UserRepository {
 
     private fun notifyChanges() = listeners.forEach { it.invoke(users) }
 
-    fun init(name: String, type:  TypeUser){
+    fun init(name: String, type: TypeUser) {
         currentUser = User(name, type, false)
     }
 
-    fun clear(){
+    fun clear() {
         currentUser = null
     }
 
@@ -35,7 +35,7 @@ object UserRepository {
     init {
         users = (1..50).map {
             User(
-                name ="user"+ it.toLong().toString(),
+                name = "user" + it.toLong().toString(),
                 type = TypeUser.entries[it % 3],
                 isLiked = false
             )
@@ -46,9 +46,9 @@ object UserRepository {
         return users
     }
 
-    fun likeUser(user: User){
-        val index = users.indexOfFirst{it.name == user.name}
-        if (index!=-1){
+    fun likeUser(user: User) {
+        val index = users.indexOfFirst { it.name == user.name }
+        if (index != -1) {
             users = ArrayList(users)
             if (users[index].isLiked)
                 users[index].isLiked = false
@@ -58,9 +58,19 @@ object UserRepository {
         notifyChanges()
     }
 
-    fun onItemDismiss(position: Int) {
-        users.removeAt(position)
+    fun onItemDismiss(user: User) {
+        users.remove(user)
         notifyChanges()
+    }
+
+    fun movePerson(fromUser: User, toUser: User) {
+        val oldIndex = users.indexOfFirst { it.name == fromUser.name }
+        val newIndex = users.indexOfFirst { it.name == toUser.name }
+        if (oldIndex != -1 && newIndex!=-1) {
+            users = ArrayList(users)
+            Collections.swap(users, oldIndex, newIndex)
+            notifyChanges()
+        }
     }
 
     fun onItemMove(fromPosition: Int, toPosition: Int) {

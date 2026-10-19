@@ -2,6 +2,7 @@ package com.project.kotlin3
 
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.project.kotlin3.UserAdapter.UserViewHolder
 
 class SimpleItemTouchHelperCallback(private val mAdapter: ItemTouchHelperAdapter) :
     ItemTouchHelper.Callback() {
@@ -28,11 +29,14 @@ class SimpleItemTouchHelperCallback(private val mAdapter: ItemTouchHelperAdapter
         viewHolder: RecyclerView.ViewHolder,
         target: RecyclerView.ViewHolder
     ): Boolean {
-        mAdapter.onItemMove(viewHolder.adapterPosition, target.adapterPosition)
+        val fromUser = viewHolder.itemView.tag as User
+        val toUser = target.itemView.tag as User
+        mAdapter.onItemMove(fromUser, toUser)
         return true
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        mAdapter.onItemDismiss(viewHolder.adapterPosition)
+        val user = viewHolder.itemView.tag as User
+        mAdapter.onItemDismiss(user)
     }
 }

@@ -7,7 +7,6 @@ import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
-import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.project.kotlin3.UserRepository.selectedUser
 import com.project.kotlin3.View.AccountActivity

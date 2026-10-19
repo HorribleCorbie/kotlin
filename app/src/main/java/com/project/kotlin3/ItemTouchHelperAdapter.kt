@@ -1,7 +1,7 @@
 package com.project.kotlin3
 
 interface ItemTouchHelperAdapter {
-    fun onItemMove(fromPosition: Int, toPosition: Int)
+    fun onItemMove(fromUser: User, toUser: User)
 
-    fun onItemDismiss(position: Int)
+    fun onItemDismiss(user: User)
 }

@@ -25,7 +25,7 @@ class ListActivity : AppCompatActivity() {
 
     var isProgramClick = false
 
-    private val listener: UserRepository.UserListener = {adapter.data = it}
+    private val listener: UserRepository.UserListener = {printChats()}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,9 +45,11 @@ class ListActivity : AppCompatActivity() {
         binding.recycleView.adapter = adapter
 
         val mAdapter= SimpleItemTouchHelperCallback(object : ItemTouchHelperAdapter{
-            override fun onItemDismiss(position: Int) = UserRepository.onItemDismiss(position)
+            override fun onItemDismiss(user: User) = UserRepository.onItemDismiss(user)
 
-            override fun onItemMove(fromPosition: Int, toPosition: Int) = UserRepository.onItemMove(fromPosition, toPosition)
+//            override fun onItemMove(fromPosition: Int, toPosition: Int) = UserRepository.onItemMove(fromPosition, toPosition)
+
+            override fun onItemMove(fromUser: User, toUser: User) = UserRepository.movePerson(fromUser, toUser)
         })
 
         val callback: ItemTouchHelper.Callback = mAdapter
@@ -124,7 +126,7 @@ class ListActivity : AppCompatActivity() {
             binding.selectTablet.isChecked && binding.selectPC.isChecked && binding.selectPhone.isChecked
     }
 
-    fun printChats() {
+    fun printChats(){
         var newList: List<User> = UserRepository.getUsers()
 
         if (!binding.selectPC.isChecked) {

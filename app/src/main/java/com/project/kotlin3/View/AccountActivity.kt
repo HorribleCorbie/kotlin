@@ -14,6 +14,7 @@ import androidx.core.view.get
 import com.project.kotlin3.R
 import com.project.kotlin3.TypeUser
 import com.project.kotlin3.User
+import com.project.kotlin3.UserRepository
 import com.project.kotlin3.UserRepository.currentUser
 import com.project.kotlin3.databinding.ActivityAccountBinding
 
@@ -48,12 +49,13 @@ class AccountActivity : AppCompatActivity() {
         binding.save.setOnClickListener {
             try {
                 val name = binding.enterName.getText().trim().toString()
-                val list = ListActivity.list
+                val list = UserRepository.getUsers()
 
                 if (name.isEmpty() || name.length > 50) {
                     throw NullPointerException()
                 }
-                if (name in list.keys) {
+                val hashList = list.map{it.name to it}.toMap()
+                if (name in hashList.keys){
                     throw IllegalArgumentException()
                 }
 

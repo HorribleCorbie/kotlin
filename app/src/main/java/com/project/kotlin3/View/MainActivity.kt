@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.project.kotlin3.UserRepository
 import com.project.kotlin3.databinding.ActivityMainBinding
 
 //3.  Bluetooth-чат на базе Android
@@ -34,12 +35,13 @@ class MainActivity : AppCompatActivity() {
         binding.enter.setOnClickListener {
             try {
                 val name: String = binding.enterName.getText().trim().toString()
-                val list = ListActivity.list
+                val list = UserRepository.getUsers()
 
                 if (name.isEmpty() || name.length > 50) {
                     throw NullPointerException()
                 }
-                if (name in list.keys){
+                val hashList = list.map{it.name to it}.toMap()
+                if (name in hashList.keys){
                     throw IllegalArgumentException()
                 }
 

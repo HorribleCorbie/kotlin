@@ -6,16 +6,14 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.get
 import com.project.kotlin3.R
 import com.project.kotlin3.TypeUser
 import com.project.kotlin3.User
 import com.project.kotlin3.UserRepository
 import com.project.kotlin3.UserRepository.currentUser
+import com.project.kotlin3.UserRepository.selectedUser
 import com.project.kotlin3.databinding.ActivityAccountBinding
 
 class AccountActivity : AppCompatActivity() {
@@ -24,15 +22,30 @@ class AccountActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAccountBinding.inflate(layoutInflater)
+
+        val intent = getIntent()
+        val user = intent.getStringExtra("user") ?: ""
+
         setContentView(binding.root)
 
-        binding.enterName.setText(currentUser?.name)
+        var currentName: String?
+        var currentType: TypeUser?
+
+        if (user == "currentUser"){
+            currentName = currentUser?.name
+            currentType = currentUser?.type
+        }
+        else{
+            currentName = selectedUser?.name
+            currentType = selectedUser?.type
+        }
+        binding.enterName.setText(currentName)
 
         lateinit var type: TypeUser
         val typeUser = TypeUser.entries.toTypedArray()
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, typeUser)
         binding.type.adapter = adapter
-        val position: Int = adapter.getPosition(currentUser?.type)
+        val position: Int = adapter.getPosition(currentType)
 
         binding.type.setSelection(position)
 
@@ -55,11 +68,16 @@ class AccountActivity : AppCompatActivity() {
                     throw NullPointerException()
                 }
                 val hashList = list.map{it.name to it}.toMap()
-                if (name in hashList.keys){
+                if (name in hashList.keys && currentName!=name){
                     throw IllegalArgumentException()
                 }
 
-                currentUser?.change(name, type)
+                if (user == "currentUser"){
+                    currentUser?.change(name, type)
+                }
+                else{
+                    selectedUser?.change(name, type)
+                }
 
                 Toast.makeText(
                     this, "Сохранено",

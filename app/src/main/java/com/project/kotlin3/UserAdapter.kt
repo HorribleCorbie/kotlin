@@ -1,17 +1,22 @@
 package com.project.kotlin3
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.project.kotlin3.UserRepository.selectedUser
+import com.project.kotlin3.View.AccountActivity
 import com.project.kotlin3.databinding.ItemChatBinding
 
 class UserAdapter(private val userActionListener: UserActionListener) : RecyclerView.Adapter<UserAdapter.UserViewHolder>(), View.OnClickListener {
 
     var data: List<User> = emptyList()
+        @SuppressLint("NotifyDataSetChanged")
         set(newValue) {
             field = newValue
             notifyDataSetChanged()
@@ -62,32 +67,23 @@ class UserAdapter(private val userActionListener: UserActionListener) : Recycler
     private fun showPopupMenu(view: View) {
         val popupMenu = PopupMenu(view.context, view)
         val user = view.tag as User
-        val position = data.indexOfFirst { it.name == user.name }
 
-        popupMenu.menu.add(0, ID_MOVE_UP, Menu.NONE, "Up").apply {
-            isEnabled = position > 0
-        }
-        popupMenu.menu.add(0, ID_MOVE_DOWN, Menu.NONE, "Down").apply {
-            isEnabled = position < data.size - 1
-        }
-        popupMenu.menu.add(0, ID_REMOVE, Menu.NONE, "Remove")
+        popupMenu.menu.add(0, 1, Menu.NONE, "Изменить")
 
         popupMenu.setOnMenuItemClickListener {
             when (it.itemId) {
-                ID_MOVE_UP -> userActionListener.onUserMove(user, -1)
-                ID_MOVE_DOWN -> userActionListener.onUserMove(user, 1)
-                ID_REMOVE -> userActionListener.onUserRemove(user)
+                1 -> {
+                    selectedUser = user
+                    val intend = Intent(view.context, AccountActivity::class.java)
+                    intend.putExtra("user", "selectedUser")
+                    view.context.startActivity(intend)
+                    user.change(selectedUser?.name ?: user.name, selectedUser?.type ?: user.type)
+                }
             }
             return@setOnMenuItemClickListener true
         }
 
         popupMenu.show()
-    }
-
-    companion object {
-        private const val ID_MOVE_UP = 1
-        private const val ID_MOVE_DOWN = 2
-        private const val ID_REMOVE = 3
     }
 
     class UserViewHolder(val binding: ItemChatBinding) : RecyclerView.ViewHolder(binding.root)

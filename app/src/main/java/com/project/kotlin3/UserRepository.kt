@@ -1,10 +1,10 @@
 package com.project.kotlin3
 
-import androidx.room.util.copy
 import java.util.Collections
 
 object UserRepository {
     var currentUser: User? = null
+    var selectedUser: User? = null
 
     typealias UserListener = (users: List<User>) -> Unit
 
@@ -58,21 +58,20 @@ object UserRepository {
         notifyChanges()
     }
 
-    fun removeUser(user: User){
-        val index = users.indexOfFirst { it.name == user.name }
-        if (index!=-1){
-            users = ArrayList(users)
-            users.removeAt(index)
-        }
+    fun onItemDismiss(position: Int) {
+        users.removeAt(position)
         notifyChanges()
     }
 
-    fun moveUser(user: User, moveBy: Int){
-        val index = users.indexOfFirst { it.name == user.name }
-        if (index!=-1){
-            val newIndex = index + moveBy
-            users = ArrayList(users)
-            Collections.swap(users, index, newIndex)
+    fun onItemMove(fromPosition: Int, toPosition: Int) {
+        if (fromPosition < toPosition) {
+            for (i in fromPosition..<toPosition) {
+                Collections.swap(users, i, i + 1)
+            }
+        } else {
+            for (i in fromPosition downTo toPosition + 1) {
+                Collections.swap(users, i, i - 1)
+            }
         }
         notifyChanges()
     }

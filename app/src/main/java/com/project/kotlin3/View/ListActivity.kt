@@ -1,28 +1,23 @@
 package com.project.kotlin3.View
 
-import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.res.ColorStateList
-import android.graphics.Color
-import android.graphics.PorterDuff
 import android.os.Bundle
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.get
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.project.kotlin3.ItemTouchHelperAdapter
 import com.project.kotlin3.R
+import com.project.kotlin3.SimpleItemTouchHelperCallback
 import com.project.kotlin3.TypeUser
 import com.project.kotlin3.User
-import com.project.kotlin3.databinding.ActivityListChatsBinding
-import androidx.core.graphics.toColorInt
-import androidx.core.view.get
-import androidx.core.widget.TextViewCompat
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.project.kotlin3.UserActionListener
 import com.project.kotlin3.UserAdapter
 import com.project.kotlin3.UserRepository
 import com.project.kotlin3.UserRepository.currentUser
+import com.project.kotlin3.databinding.ActivityListChatsBinding
+
 
 class ListActivity : AppCompatActivity() {
     lateinit var binding: ActivityListChatsBinding
@@ -43,15 +38,21 @@ class ListActivity : AppCompatActivity() {
 
             override fun onUserLike(user: User) = UserRepository.likeUser(user)
 
-            override fun onUserRemove(user: User) = UserRepository.removeUser(user)
-
-            override fun onUserMove(user: User, moveBy: Int) = UserRepository.moveUser(user, moveBy)
-
         })
         adapter.data = UserRepository.getUsers()
 
         binding.recycleView.layoutManager = LinearLayoutManager(this)
         binding.recycleView.adapter = adapter
+
+        val mAdapter= SimpleItemTouchHelperCallback(object : ItemTouchHelperAdapter{
+            override fun onItemDismiss(position: Int) = UserRepository.onItemDismiss(position)
+
+            override fun onItemMove(fromPosition: Int, toPosition: Int) = UserRepository.onItemMove(fromPosition, toPosition)
+        })
+
+        val callback: ItemTouchHelper.Callback = mAdapter
+        val touchHelper = ItemTouchHelper(callback)
+        touchHelper.attachToRecyclerView(binding.recycleView)
 
         UserRepository.addListener(listener)
 
@@ -78,6 +79,7 @@ class ListActivity : AppCompatActivity() {
                 }
                 R.id.account -> {
                     val intend = Intent(this, AccountActivity::class.java)
+                    intend.putExtra("user", "currentUser")
                     startActivity(intend)
                     true
                 }

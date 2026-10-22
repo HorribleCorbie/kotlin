@@ -76,7 +76,6 @@ class UserAdapter(private val userActionListener: UserActionListener) : Recycler
                     val intend = Intent(view.context, AccountActivity::class.java)
                     intend.putExtra("user", "selectedUser")
                     view.context.startActivity(intend)
-                    user.change(selectedUser?.name ?: user.name, selectedUser?.type ?: user.type)
                 }
             }
             return@setOnMenuItemClickListener true

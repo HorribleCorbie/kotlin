@@ -1,5 +1,8 @@
 package com.project.kotlin3
 
+import android.content.Intent
+import android.view.View
+import com.project.kotlin3.View.AccountActivity
 import java.util.Collections
 
 object UserRepository {
@@ -27,7 +30,7 @@ object UserRepository {
     }
 
     fun clear() {
-        currentUser = null
+        selectedUser = null
     }
 
     private var users = mutableListOf<User>()
@@ -63,7 +66,7 @@ object UserRepository {
         notifyChanges()
     }
 
-    fun movePerson(fromUser: User, toUser: User) {
+    fun moveUser(fromUser: User, toUser: User) {
         val oldIndex = users.indexOfFirst { it.name == fromUser.name }
         val newIndex = users.indexOfFirst { it.name == toUser.name }
         if (oldIndex != -1 && newIndex!=-1) {
@@ -73,16 +76,24 @@ object UserRepository {
         }
     }
 
-    fun onItemMove(fromPosition: Int, toPosition: Int) {
-        if (fromPosition < toPosition) {
-            for (i in fromPosition..<toPosition) {
-                Collections.swap(users, i, i + 1)
-            }
-        } else {
-            for (i in fromPosition downTo toPosition + 1) {
-                Collections.swap(users, i, i - 1)
-            }
-        }
+
+    fun createUser(fromUser: User, view: View){
+        val index = users.indexOfFirst { it.name == fromUser.name }
+        val intend = Intent(view.context, AccountActivity::class.java)
+        intend.putExtra("user", "newUser")
+        intend.putExtra("index", index)
+        view.context.startActivity(intend)
+    }
+
+    fun createUser(index: Int){
+        selectedUser?.let { users.add(index, it) }
+        clear()
+        notifyChanges()
+    }
+
+    fun changeUser(user:User){
+        user.change(selectedUser?.name ?: user.name, selectedUser?.type ?: user.type)
+        clear()
         notifyChanges()
     }
 }

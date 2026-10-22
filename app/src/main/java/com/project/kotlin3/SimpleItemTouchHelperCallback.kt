@@ -19,8 +19,8 @@ class SimpleItemTouchHelperCallback(private val mAdapter: ItemTouchHelperAdapter
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder
     ): Int {
-        val dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN
-        val swipeFlags = ItemTouchHelper.START or ItemTouchHelper.END
+        val swipeFlags  = ItemTouchHelper.UP or ItemTouchHelper.DOWN
+        val dragFlags = ItemTouchHelper.START or ItemTouchHelper.END
         return makeMovementFlags(dragFlags, swipeFlags)
     }
 
@@ -37,6 +37,13 @@ class SimpleItemTouchHelperCallback(private val mAdapter: ItemTouchHelperAdapter
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         val user = viewHolder.itemView.tag as User
-        mAdapter.onItemDismiss(user)
+        when (direction){
+            ItemTouchHelper.UP ->{
+                mAdapter.onItemDismiss(user)
+            }
+            ItemTouchHelper.DOWN ->{
+                mAdapter.onItemCreate(user, viewHolder.itemView)
+            }
+        }
     }
 }

@@ -2,9 +2,11 @@ package com.project.kotlin3.View
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.project.kotlin3.ItemTouchHelperAdapter
@@ -41,15 +43,22 @@ class ListActivity : AppCompatActivity() {
         })
         adapter.data = UserRepository.getUsers()
 
-        binding.recycleView.layoutManager = LinearLayoutManager(this)
+//        binding.recycleView.layoutManager = LinearLayoutManager(this)
+        binding.recycleView.layoutManager = GridLayoutManager(
+            this,
+            10,
+            GridLayoutManager.HORIZONTAL,
+            false
+        )
+
         binding.recycleView.adapter = adapter
 
         val mAdapter= SimpleItemTouchHelperCallback(object : ItemTouchHelperAdapter{
             override fun onItemDismiss(user: User) = UserRepository.onItemDismiss(user)
 
-//            override fun onItemMove(fromPosition: Int, toPosition: Int) = UserRepository.onItemMove(fromPosition, toPosition)
+            override fun onItemCreate(user: User, view: View) = UserRepository.createUser(user, view)
 
-            override fun onItemMove(fromUser: User, toUser: User) = UserRepository.movePerson(fromUser, toUser)
+            override fun onItemMove(fromUser: User, toUser: User) = UserRepository.moveUser(fromUser, toUser)
         })
 
         val callback: ItemTouchHelper.Callback = mAdapter
@@ -140,5 +149,10 @@ class ListActivity : AppCompatActivity() {
         }
 
         adapter.data = newList
+    }
+
+    override fun onResume() {
+        super.onResume()
+        printChats()
     }
 }

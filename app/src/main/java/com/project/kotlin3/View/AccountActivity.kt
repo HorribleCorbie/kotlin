@@ -25,6 +25,7 @@ class AccountActivity : AppCompatActivity() {
 
         val intent = getIntent()
         val user = intent.getStringExtra("user") ?: ""
+        val index = intent.getIntExtra("index", -1)
 
         setContentView(binding.root)
 
@@ -36,8 +37,8 @@ class AccountActivity : AppCompatActivity() {
             currentType = currentUser?.type
         }
         else{
-            currentName = selectedUser?.name
-            currentType = selectedUser?.type
+            currentName = selectedUser?.name ?: ""
+            currentType = selectedUser?.type ?: TypeUser.Phone
         }
         binding.enterName.setText(currentName)
 
@@ -68,15 +69,20 @@ class AccountActivity : AppCompatActivity() {
                     throw NullPointerException()
                 }
                 val hashList = list.map{it.name to it}.toMap()
-                if (name in hashList.keys && currentName!=name){
+                if (name in hashList.keys && currentName!=name || name==currentUser?.name){
                     throw IllegalArgumentException()
                 }
 
                 if (user == "currentUser"){
                     currentUser?.change(name, type)
                 }
-                else{
+                else if(selectedUser!=null && index==-1){
+                    val user = selectedUser
                     selectedUser?.change(name, type)
+                    UserRepository.changeUser(user!!)
+                }else{
+                    selectedUser=User(name, type, false)
+                    UserRepository.createUser(index)
                 }
 
                 Toast.makeText(

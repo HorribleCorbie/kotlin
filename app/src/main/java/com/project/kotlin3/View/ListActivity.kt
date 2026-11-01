@@ -1,42 +1,55 @@
 package com.project.kotlin3.View
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import androidx.core.view.get
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.project.kotlin3.FileExtension
+import com.project.kotlin3.FileManager
 import com.project.kotlin3.Interface.ItemTouchHelperAdapter
+import com.project.kotlin3.Interface.UserActionListener
 import com.project.kotlin3.R
 import com.project.kotlin3.SimpleItemTouchHelperCallback
 import com.project.kotlin3.TypeUser
 import com.project.kotlin3.User
-import com.project.kotlin3.Interface.UserActionListener
 import com.project.kotlin3.UserAdapter
 import com.project.kotlin3.UserRepository
 import com.project.kotlin3.UserRepository.currentUser
 import com.project.kotlin3.databinding.ActivityListChatsBinding
 
-
+//7 лаба 1 вариант
 class ListActivity : AppCompatActivity() {
     lateinit var binding: ActivityListChatsBinding
     lateinit var adapter: UserAdapter
 
     var isProgramClick = false
 
-    private val listener: UserRepository.UserListener = {printChats()}
+    private val PREFS_FILE: String = "Account"
+    private val PREF_NAME: String = "Liked"
+    var settings: SharedPreferences? = null
+
+    private val listener: UserRepository.UserListener = { printChats() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityListChatsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.toolbar)
+        settings = getSharedPreferences(PREFS_FILE, MODE_PRIVATE)
+
         adapter = UserAdapter(object : UserActionListener {
             override fun onUserGetId(user: User) =
-                Toast.makeText(this@ListActivity, "Пользователь : ${user.name}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ListActivity, "Пользователь : ${user.name}", Toast.LENGTH_SHORT)
+                    .show()
 
             override fun onUserLike(user: User) = UserRepository.likeUser(user)
 
@@ -46,12 +59,14 @@ class ListActivity : AppCompatActivity() {
 
         binding.recycleView.adapter = adapter
 
-        val callback= SimpleItemTouchHelperCallback(object : ItemTouchHelperAdapter{
+        val callback = SimpleItemTouchHelperCallback(object : ItemTouchHelperAdapter {
             override fun onItemDismiss(user: User) = UserRepository.onItemDismiss(user)
 
-            override fun onItemCreate(user: User, view: View) = UserRepository.createUser(user, view)
+            override fun onItemCreate(user: User, view: View) =
+                UserRepository.createUser(user, view)
 
-            override fun onItemMove(fromUser: User, toUser: User) = UserRepository.moveUser(fromUser, toUser)
+            override fun onItemMove(fromUser: User, toUser: User) =
+                UserRepository.moveUser(fromUser, toUser)
         })
 
         val touchHelper = ItemTouchHelper(callback)
@@ -59,7 +74,7 @@ class ListActivity : AppCompatActivity() {
 
         UserRepository.addListener(listener)
 
-        if (currentUser==null) {
+        if (currentUser == null) {
             val intent = getIntent()
             val nickname = intent.getStringExtra("name") ?: "Undefined"
             UserRepository.init(nickname, TypeUser.Phone)
@@ -69,7 +84,7 @@ class ListActivity : AppCompatActivity() {
         binding.bottomNavigation.menu[1].isChecked = true
 
         binding.bottomNavigation.setOnItemSelectedListener {
-            when(it.itemId) {
+            when (it.itemId) {
                 R.id.logout -> {
                     val intend = Intent(this, MainActivity::class.java)
                     intend.putExtra("name", currentUser?.name)
@@ -77,15 +92,18 @@ class ListActivity : AppCompatActivity() {
                     finish()
                     true
                 }
+
                 R.id.home -> {
                     true
                 }
+
                 R.id.account -> {
                     val intend = Intent(this, AccountActivity::class.java)
                     intend.putExtra("user", "currentUser")
                     startActivity(intend)
                     true
                 }
+
                 else -> {
                     false
                 }
@@ -127,17 +145,17 @@ class ListActivity : AppCompatActivity() {
             binding.selectTablet.isChecked && binding.selectPC.isChecked && binding.selectPhone.isChecked
     }
 
-    fun printChats(){
+    fun printChats() {
         var newList: List<User> = UserRepository.getUsers()
 
         if (!binding.selectPC.isChecked) {
-            newList = newList.filter{it.type !=TypeUser.PC }
+            newList = newList.filter { it.type != TypeUser.PC }
         }
         if (!binding.selectPhone.isChecked) {
-            newList =newList.filter{it.type !=TypeUser.Phone }
+            newList = newList.filter { it.type != TypeUser.Phone }
         }
         if (!binding.selectTablet.isChecked) {
-            newList = newList.filter{it.type !=TypeUser.Tablet }
+            newList = newList.filter { it.type != TypeUser.Tablet }
         }
 
         adapter.data = newList
@@ -151,5 +169,97 @@ class ListActivity : AppCompatActivity() {
     override fun onDestroy() {
         UserRepository.removeListener(listener)
         super.onDestroy()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.save_menu, menu)
+        return true
+    }
+
+    fun saveUsers() {
+        val users = UserRepository.getLikedUsers()
+        if (!users.isEmpty()) {
+            val set: Set<String> = users.map { it.name }.toSet()
+            settings!!.edit { putStringSet(PREF_NAME, set) }
+            Toast.makeText(this@ListActivity, "Сохранены настройки", Toast.LENGTH_SHORT).show()
+        } else
+            Toast.makeText(
+                this@ListActivity,
+                "У вас нет избранных для сохранения",
+                Toast.LENGTH_SHORT
+            ).show()
+    }
+
+    fun deleteUser() {
+        if (settings != null && settings!!.contains(PREF_NAME)) {
+            settings!!.edit() { remove(PREF_NAME) }
+            Toast.makeText(this@ListActivity, "Настройки удалены", Toast.LENGTH_SHORT).show()
+        } else
+            Toast.makeText(this@ListActivity, "У вас нет сохраненных настроек", Toast.LENGTH_SHORT)
+                .show()
+    }
+
+    fun getUsers() {
+        if (settings != null && settings!!.contains(PREF_NAME)) {
+            val set: Set<String>? = settings!!.getStringSet(PREF_NAME, emptySet())
+            if (set != null) {
+                UserRepository.removeLikedUsers()
+                for (i in set) {
+                    UserRepository.likeUser(i)
+                }
+            }
+        } else
+            Toast.makeText(this@ListActivity, "У вас нет сохраненных настроек", Toast.LENGTH_SHORT)
+                .show()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        when (item.itemId) {
+            R.id.save -> saveUsers()
+            R.id.delete -> deleteUser()
+            R.id.download -> getUsers()
+            R.id.save_CSV -> {
+                val f = FileManager(this@ListActivity, FileExtension.csv)
+                f.createFile(UserRepository.printListFile())
+            }
+
+            R.id.load_csv -> {
+                val f = FileManager(this@ListActivity, FileExtension.csv)
+                val c = f.openFile()
+                if (c != null)
+                    UserRepository.fromFileInList(f.openFile()!!)
+                else
+                    Toast.makeText(this@ListActivity, "Нечего загружать", Toast.LENGTH_SHORT).show()
+            }
+
+            R.id.delete_CSV -> {
+                val f = FileManager(this@ListActivity, FileExtension.csv)
+                val c = f.deleteFile()
+                Toast.makeText(this@ListActivity, c, Toast.LENGTH_SHORT).show()
+            }
+
+            R.id.save_pdf -> {
+                val f = FileManager(this@ListActivity, FileExtension.pdf)
+                f.createFile(UserRepository.printListFile())
+            }
+
+            R.id.load_pdf -> {
+                val f = FileManager(this@ListActivity, FileExtension.pdf)
+                val c = f.openFile()
+                if (c != null)
+                    UserRepository.fromFileInList(f.openFile()!!)
+                else
+                    Toast.makeText(this@ListActivity, "Нечего загружать", Toast.LENGTH_SHORT).show()
+            }
+
+            R.id.delete_PDF -> {
+                val f = FileManager(this@ListActivity, FileExtension.pdf)
+                val c = f.deleteFile()
+                Toast.makeText(this@ListActivity, c, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 }

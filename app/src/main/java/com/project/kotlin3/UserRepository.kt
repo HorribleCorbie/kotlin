@@ -1,6 +1,7 @@
 package com.project.kotlin3
 
 import android.content.Intent
+import android.util.Log
 import android.view.View
 import com.project.kotlin3.View.AccountActivity
 import java.util.Collections
@@ -49,8 +50,30 @@ object UserRepository {
         return users
     }
 
+    fun getLikedUsers(): List<User>{
+        val newList: List<User> = users.filter { it.isLiked }
+        return newList
+    }
+
+    fun  removeLikedUsers(){
+        val likedUsers = getLikedUsers()
+        likedUsers.forEach { it.isLiked=false }
+    }
+
     fun likeUser(user: User) {
         val index = users.indexOfFirst { it.name == user.name }
+        if (index != -1) {
+            users = ArrayList(users)
+            if (users[index].isLiked)
+                users[index].isLiked = false
+            else
+                users[index].isLiked = true
+        }
+        notifyChanges()
+    }
+
+    fun likeUser(name: String) {
+        val index = users.indexOfFirst { it.name == name }
         if (index != -1) {
             users = ArrayList(users)
             if (users[index].isLiked)
@@ -94,6 +117,17 @@ object UserRepository {
     fun changeUser(user:User){
         user.change(selectedUser?.name ?: user.name, selectedUser?.type ?: user.type)
         clear()
+        notifyChanges()
+    }
+
+    fun printListFile():String{
+        val list = getUsers().map { it.toString() }.joinToString(separator = "\n")
+        return list
+    }
+
+    fun fromFileInList(list: List<String>){
+        Log.e("e", list[0])
+        users = list.map { User(it) } as MutableList<User>
         notifyChanges()
     }
 }

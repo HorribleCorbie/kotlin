@@ -15,4 +15,13 @@
     <string name="nickname">Никнейм</string>
     <string name="save_account">Сохранить</string>
     <string name="device_type">Тип\nустройства</string>
+    <string name="save">Сохранить</string>
+    <string name="save_CSV">Сохранить как CSV</string>
+    <string name="save_PDF">Сохранить как PDF</string>
+    <string name="delete">Удалить</string>
+    <string name="delete_CSV">Удалить CSV</string>
+    <string name="delete_PDF">Удалить PDF</string>
+    <string name="download">Загрузить настройки</string>
+    <string name="load_csv">Загрузить CSV</string>
+    <string name="load_pdf">Загрузить PDF</string>
 </resources>

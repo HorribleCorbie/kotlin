@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/save"
+        android:title="@string/save" />
+    <item
+        android:id="@+id/delete"
+        android:title="@string/delete" />
+    <item
+        android:id="@+id/download"
+        android:title="@string/download" />
+    <item
+        android:id="@+id/save_CSV"
+        android:title="@string/save_CSV" />
+    <item
+        android:id="@+id/load_csv"
+        android:title="@string/load_csv" />
+    <item
+        android:id="@+id/delete_CSV"
+        android:title="@string/delete_CSV" />
+    <item
+        android:id="@+id/save_pdf"
+        android:title="@string/save_PDF" />
+    <item
+        android:id="@+id/load_pdf"
+        android:title="@string/load_pdf" />
+    <item
+        android:id="@+id/delete_PDF"
+        android:title="@string/delete_PDF" />
+</menu>

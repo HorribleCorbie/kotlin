@@ -101,5 +101,5 @@
         android:background="@color/details"
         app:itemTextColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:menu="@menu/bottom_nav_manu" />
+        app:menu="@menu/bottom_nav_menu" />
 </androidx.constraintlayout.widget.ConstraintLayout>

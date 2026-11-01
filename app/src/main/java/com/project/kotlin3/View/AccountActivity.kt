@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
 import com.project.kotlin3.R
+import com.project.kotlin3.TypeRepository
 import com.project.kotlin3.TypeUser
 import com.project.kotlin3.User
 import com.project.kotlin3.UserRepository
@@ -34,11 +35,13 @@ class AccountActivity : AppCompatActivity() {
 
         if (user == "currentUser"){
             currentName = currentUser?.name
-            currentType = currentUser?.type
+            currentType = TypeRepository.returnType(currentUser?.type!!)
         }
-        else{
+        else {
             currentName = selectedUser?.name ?: ""
-            currentType = selectedUser?.type ?: TypeUser.Phone
+            currentType = selectedUser?.let {
+                TypeRepository.returnType(it.type)
+            } ?: TypeUser.Phone
         }
         binding.enterName.setText(currentName)
 
@@ -74,15 +77,15 @@ class AccountActivity : AppCompatActivity() {
                 }
 
                 if (user == "currentUser"){
-                    currentUser?.change(name, type)
+                    currentUser?.change(name, TypeRepository.returnId(type)!!)
                 }
                 else if(selectedUser!=null && index==-1){
                     val user = selectedUser
-                    selectedUser?.change(name, type)
+                    selectedUser?.change(name, TypeRepository.returnId(type)!!)
                     UserRepository.changeUser(user!!)
                 }else{
-                    selectedUser=User(name, type, false)
-                    UserRepository.createUser(index)
+                    selectedUser=User(name, TypeRepository.returnId(type)!!, false)
+                    UserRepository.createUser()
                 }
 
                 Toast.makeText(

@@ -13,7 +13,8 @@ import com.project.kotlin3.UserRepository.selectedUser
 import com.project.kotlin3.View.AccountActivity
 import com.project.kotlin3.databinding.ItemChatBinding
 
-class UserAdapter(private val userActionListener: UserActionListener) : RecyclerView.Adapter<UserAdapter.UserViewHolder>(), View.OnClickListener {
+class UserAdapter(private val userActionListener: UserActionListener) :
+    RecyclerView.Adapter<UserAdapter.UserViewHolder>(), View.OnClickListener {
 
     var data: List<User> = emptyList()
         @SuppressLint("NotifyDataSetChanged")
@@ -35,8 +36,9 @@ class UserAdapter(private val userActionListener: UserActionListener) : Recycler
 
         with(holder.binding) {
             name.text = user.name
+            val type: TypeUser = TypeRepository.returnType(user.type)!!
 
-            when (user.type) {
+            when (type) {
                 TypeUser.PC -> iconType.setImageResource(R.drawable.computer_white)
                 TypeUser.Phone -> iconType.setImageResource(R.drawable.iphone_white)
                 TypeUser.Tablet -> iconType.setImageResource(R.drawable.tablet_white)
@@ -52,7 +54,7 @@ class UserAdapter(private val userActionListener: UserActionListener) : Recycler
         holder.binding.more.tag = user
     }
 
-    override fun getItemCount(): Int =data.size
+    override fun getItemCount(): Int = data.size
 
     override fun onClick(view: View) {
         val user: User = view.tag as User

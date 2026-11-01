@@ -1,7 +1,31 @@
 package com.project.kotlin3
 
-class User(var name: String, var type: TypeUser, var isLiked: Boolean) {
-    fun change(name: String, type: TypeUser) {
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
+import androidx.room.PrimaryKey
+
+@Entity(
+    tableName = "users",
+    indices = [
+        Index(value = ["name"], unique = true),
+        Index(value = ["type"])
+    ],
+    foreignKeys = [
+        ForeignKey(
+            entity = TypeUserClass::class,
+            parentColumns = ["id"],
+            childColumns = ["type"],
+            onDelete = ForeignKey.RESTRICT
+        )
+    ]
+)
+
+class User(var name: String, var type: Int, var isLiked: Boolean) {
+    @PrimaryKey(autoGenerate = true)
+    var id: Int = 0
+
+    fun change(name: String, type: Int) {
         this.name = name
         this.type = type
     }
@@ -15,7 +39,7 @@ class User(var name: String, var type: TypeUser, var isLiked: Boolean) {
 
     constructor(raw: List<String>): this(
         name = raw[0],
-        type = TypeUser.valueOf( raw[1]),
+        type = raw[1].toInt(),
         isLiked = raw[2].toBoolean()
     )
 }

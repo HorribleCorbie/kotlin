@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.core.view.get
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.project.kotlin3.FileExtension
@@ -18,14 +19,19 @@ import com.project.kotlin3.Interface.ItemTouchHelperAdapter
 import com.project.kotlin3.Interface.UserActionListener
 import com.project.kotlin3.R
 import com.project.kotlin3.SimpleItemTouchHelperCallback
+import com.project.kotlin3.TypeRepository
 import com.project.kotlin3.TypeUser
 import com.project.kotlin3.User
 import com.project.kotlin3.UserAdapter
 import com.project.kotlin3.UserRepository
 import com.project.kotlin3.UserRepository.currentUser
+import com.project.kotlin3.UserRoomDatabase
 import com.project.kotlin3.databinding.ActivityListChatsBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-//7 лаба 1 вариант
+
 class ListActivity : AppCompatActivity() {
     lateinit var binding: ActivityListChatsBinding
     lateinit var adapter: UserAdapter
@@ -72,12 +78,27 @@ class ListActivity : AppCompatActivity() {
         val touchHelper = ItemTouchHelper(callback)
         touchHelper.attachToRecyclerView(binding.recycleView)
 
-        UserRepository.addListener(listener)
+        lifecycleScope.launch {
 
-        if (currentUser == null) {
-            val intent = getIntent()
-            val nickname = intent.getStringExtra("name") ?: "Undefined"
-            UserRepository.init(nickname, TypeUser.Phone)
+            val userDb = UserRoomDatabase.getInstance(application)
+
+            withContext(Dispatchers.IO) {
+
+                val userDao = userDb.userDao()
+                val typeDao = userDb.typeDao()
+
+                TypeRepository.init(typeDao)
+
+                if (currentUser == null) {
+                    val nickname = intent.getStringExtra("name") ?: "Undefined"
+
+                    val phoneId = TypeRepository.returnId(TypeUser.Phone)!!
+
+                    UserRepository.init(nickname, phoneId, userDao)
+                }
+            }
+
+            UserRepository.addListener(listener)
         }
 
 
@@ -149,13 +170,13 @@ class ListActivity : AppCompatActivity() {
         var newList: List<User> = UserRepository.getUsers()
 
         if (!binding.selectPC.isChecked) {
-            newList = newList.filter { it.type != TypeUser.PC }
+            newList = newList.filter { TypeRepository.returnType(it.type) != TypeUser.PC }
         }
         if (!binding.selectPhone.isChecked) {
-            newList = newList.filter { it.type != TypeUser.Phone }
+            newList = newList.filter { TypeRepository.returnType(it.type) != TypeUser.Phone }
         }
         if (!binding.selectTablet.isChecked) {
-            newList = newList.filter { it.type != TypeUser.Tablet }
+            newList = newList.filter { TypeRepository.returnType(it.type) != TypeUser.Tablet }
         }
 
         adapter.data = newList
@@ -178,21 +199,23 @@ class ListActivity : AppCompatActivity() {
 
     fun saveUsers() {
         val users = UserRepository.getLikedUsers()
-        if (!users.isEmpty()) {
-            val set: Set<String> = users.map { it.name }.toSet()
-            settings!!.edit { putStringSet(PREF_NAME, set) }
-            Toast.makeText(this@ListActivity, "Сохранены настройки", Toast.LENGTH_SHORT).show()
-        } else
-            Toast.makeText(
-                this@ListActivity,
-                "У вас нет избранных для сохранения",
-                Toast.LENGTH_SHORT
-            ).show()
+        users.isEmpty()?.let {
+            if (!it) {
+                val set: Set<String> = users.map { it.name }.toSet()
+                settings!!.edit { putStringSet(PREF_NAME, set) }
+                Toast.makeText(this@ListActivity, "Сохранены настройки", Toast.LENGTH_SHORT).show()
+            } else
+                Toast.makeText(
+                    this@ListActivity,
+                    "У вас нет избранных для сохранения",
+                    Toast.LENGTH_SHORT
+                ).show()
+        }
     }
 
     fun deleteUser() {
         if (settings != null && settings!!.contains(PREF_NAME)) {
-            settings!!.edit() { remove(PREF_NAME) }
+            settings!!.edit { remove(PREF_NAME) }
             Toast.makeText(this@ListActivity, "Настройки удалены", Toast.LENGTH_SHORT).show()
         } else
             Toast.makeText(this@ListActivity, "У вас нет сохраненных настроек", Toast.LENGTH_SHORT)
@@ -227,8 +250,10 @@ class ListActivity : AppCompatActivity() {
             R.id.load_csv -> {
                 val f = FileManager(this@ListActivity, FileExtension.csv)
                 val c = f.openFile()
-                if (c != null)
-                    UserRepository.fromFileInList(f.openFile()!!)
+                if (c != null){
+                    UserRepository.fromFileInList(c)
+                    printChats()
+                }
                 else
                     Toast.makeText(this@ListActivity, "Нечего загружать", Toast.LENGTH_SHORT).show()
             }
@@ -247,8 +272,10 @@ class ListActivity : AppCompatActivity() {
             R.id.load_pdf -> {
                 val f = FileManager(this@ListActivity, FileExtension.pdf)
                 val c = f.openFile()
-                if (c != null)
-                    UserRepository.fromFileInList(f.openFile()!!)
+                if (c != null) {
+                    UserRepository.fromFileInList(c)
+                    printChats()
+                }
                 else
                     Toast.makeText(this@ListActivity, "Нечего загружать", Toast.LENGTH_SHORT).show()
             }

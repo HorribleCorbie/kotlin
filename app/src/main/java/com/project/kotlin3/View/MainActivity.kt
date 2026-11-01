@@ -5,19 +5,19 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.project.kotlin3.User
 import com.project.kotlin3.UserRepository
+import com.project.kotlin3.UserRoomDatabase
 import com.project.kotlin3.databinding.ActivityMainBinding
-
-//3.  Bluetooth-чат на базе Android
-//Пользователь вводит имя, которые будет отображаться в чате и получает список найденных устройств.
-//I2 – CheckBox
-//L1 – Linear
-//O4 – ScrollView
-//4 лаба: вариант N1 – Bottom Navigation View и T2 – Из других окон в начальное
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityMainBinding
+    lateinit var list: List<User>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,10 +32,18 @@ class MainActivity : AppCompatActivity() {
             binding.enterName.setText(nickname)
         }
 
+        val userDb = UserRoomDatabase.getInstance(application)
+        val userDao = userDb.userDao()
+
+        lifecycleScope.launch {
+            list = withContext(Dispatchers.IO) {
+                userDao.getUsers()
+            }
+        }
+
         binding.enter.setOnClickListener {
             try {
                 val name: String = binding.enterName.getText().trim().toString()
-                val list = UserRepository.getUsers()
 
                 if (name.isEmpty() || name.length > 50) {
                     throw NullPointerException()

@@ -3,12 +3,19 @@ package com.project.kotlin3
 import android.content.Intent
 import android.util.Log
 import android.view.View
+import com.project.kotlin3.Interface.UserDao
 import com.project.kotlin3.View.AccountActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Collections
 
-object UserRepository {
+object UserRepository{
     var currentUser: User? = null
     var selectedUser: User? = null
+    var userDao: UserDao? = null
+    private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     typealias UserListener = (users: List<User>) -> Unit
 
@@ -24,69 +31,69 @@ object UserRepository {
         listener.invoke(users)
     }
 
-    private fun notifyChanges() = listeners.forEach { it.invoke(users) }
+    private var users: List<User> = emptyList()
+    private fun notifyChanges() {
+        listeners.forEach {
+            it.invoke(users)
+        }
+    }
 
-    fun init(name: String, type: TypeUser) {
+    fun init(name: String, type: Int, userD: UserDao) {
         currentUser = User(name, type, false)
+        userDao = userD
+        users = userDao!!.getUsers()
     }
 
     fun clear() {
         selectedUser = null
     }
 
-    private var users = mutableListOf<User>()
-
-    init {
-        users = (1..50).map {
-            User(
-                name = "user" + it.toLong().toString(),
-                type = TypeUser.entries[it % 3],
-                isLiked = false
-            )
-        }.toMutableList()
-    }
-
-    fun getUsers(): MutableList<User> {
+    fun getUsers(): List<User> {
         return users
     }
 
-    fun getLikedUsers(): List<User>{
-        val newList: List<User> = users.filter { it.isLiked }
-        return newList
+    fun getLikedUsers(): List<User> {
+        return users.filter { it.isLiked }
     }
 
     fun  removeLikedUsers(){
         val likedUsers = getLikedUsers()
-        likedUsers.forEach { it.isLiked=false }
+        likedUsers.forEach { it.isLiked=false
+            coroutineScope.launch(Dispatchers.IO) {
+                userDao?.updateUser(it)
+            }
+        }
     }
 
     fun likeUser(user: User) {
-        val index = users.indexOfFirst { it.name == user.name }
+        val index = users.indexOfFirst { it.id == user.id }
+
         if (index != -1) {
-            users = ArrayList(users)
-            if (users[index].isLiked)
-                users[index].isLiked = false
-            else
-                users[index].isLiked = true
+            users[index].isLiked = !users[index].isLiked
+
+            updateUsers {
+                it.updateUser(users[index])
+            }
         }
-        notifyChanges()
     }
 
     fun likeUser(name: String) {
         val index = users.indexOfFirst { it.name == name }
+
         if (index != -1) {
-            users = ArrayList(users)
-            if (users[index].isLiked)
-                users[index].isLiked = false
-            else
-                users[index].isLiked = true
+            users[index].isLiked = !users[index].isLiked
+
+            updateUsers {
+                it.updateUser(users[index])
+            }
         }
-        notifyChanges()
     }
 
+
     fun onItemDismiss(user: User) {
-        users.remove(user)
-        notifyChanges()
+        updateUsers {
+            it.deleteUser(user)
+        }
     }
 
     fun moveUser(fromUser: User, toUser: User) {
@@ -95,7 +102,6 @@ object UserRepository {
         if (oldIndex != -1 && newIndex!=-1) {
             users = ArrayList(users)
             Collections.swap(users, oldIndex, newIndex)
-            notifyChanges()
         }
     }
 
@@ -108,16 +114,27 @@ object UserRepository {
         view.context.startActivity(intend)
     }
 
-    fun createUser(index: Int){
-        selectedUser?.let { users.add(index, it) }
+    fun createUser() {
+        selectedUser?.let { user ->
+            updateUsers {
+                it.addUser(user)
+            }
+        }
+
         clear()
-        notifyChanges()
     }
 
-    fun changeUser(user:User){
-        user.change(selectedUser?.name ?: user.name, selectedUser?.type ?: user.type)
+    fun changeUser(user: User) {
+        user.change(
+            selectedUser?.name ?: user.name,
+            selectedUser?.type ?: user.type
+        )
+
+        updateUsers {
+            it.updateUser(user)
+        }
+
         clear()
-        notifyChanges()
     }
 
     fun printListFile():String{
@@ -126,8 +143,33 @@ object UserRepository {
     }
 
     fun fromFileInList(list: List<String>){
-        Log.e("e", list[0])
-        users = list.map { User(it) } as MutableList<User>
-        notifyChanges()
+        val names = users.mapTo(mutableSetOf()) { it.name }
+        val newUsers =  list.map { User(it) }
+        val newNames = newUsers.mapTo(mutableSetOf()) { it.name }
+        val deletedUsers = users.filter { !newNames.contains(it.name) }
+        val u = newUsers.filter { !names.contains(it.name) } as MutableList<User>
+        updateUsers {
+            it.addUsers(u)
+        }
+        updateUsers {
+            it.deleteUsers(deletedUsers)
+        }
+    }
+
+    private fun updateUsers(action: (UserDao) -> Unit) {
+        val dao = userDao ?: return
+
+        coroutineScope.launch {
+            val updatedUsers = withContext(Dispatchers.IO) {
+                action(dao)
+                dao.getUsers()
+            }
+
+            users = updatedUsers
+
+            listeners.forEach {
+                it.invoke(users)
+            }
+        }
     }
 }

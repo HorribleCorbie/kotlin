@@ -5,7 +5,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
 object TypeRepository {
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
     var typeDao: TypeDao? = null
     private var types: List<TypeUserClass>  = emptyList()
 

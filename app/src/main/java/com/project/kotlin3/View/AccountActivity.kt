@@ -71,7 +71,7 @@ class AccountActivity : AppCompatActivity() {
                 if (name.isEmpty() || name.length > 50) {
                     throw NullPointerException()
                 }
-                val hashList = list.map{it.name to it}.toMap()
+                val hashList = list.associateBy { it.name }
                 if (name in hashList.keys && currentName!=name || name==currentUser?.name){
                     throw IllegalArgumentException()
                 }

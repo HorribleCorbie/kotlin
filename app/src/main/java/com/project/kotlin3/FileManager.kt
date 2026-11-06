@@ -19,7 +19,7 @@ class FileManager(val context: Activity, val type: FileExtension) {
     val pathFiles = "bluetoothChat"
     var nameFile: String = type.toString() + "File." + type.toString()
     var pageHeight: Int = 1120
-    var pagewidth: Int = 792
+    var pageWidth: Int = 792
     fun createFile(message: String) {
 
         val directory = File(context.getExternalFilesDir(null), pathFiles)
@@ -99,15 +99,15 @@ class FileManager(val context: Activity, val type: FileExtension) {
         val lines = message.split("\n")
         var currentPageNumber = 1
 
-        var mypageInfo = PageInfo.Builder(pagewidth, pageHeight, currentPageNumber).create()
+        var mypageInfo = PageInfo.Builder(pageWidth, pageHeight, currentPageNumber).create()
 
         var myPage = pdfDocument.startPage(mypageInfo)
 
-        var canvas = myPage.getCanvas()
+        var canvas = myPage.canvas
 
         title.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL))
 
-        title.setTextSize(15f)
+        title.textSize = 15f
 
         title.setColor(ContextCompat.getColor(context, R.color.black))
 
@@ -122,9 +122,9 @@ class FileManager(val context: Activity, val type: FileExtension) {
                 currentPageNumber++
                 pdfDocument.finishPage(myPage)
 
-                mypageInfo = PageInfo.Builder(pagewidth, pageHeight, currentPageNumber).create()
+                mypageInfo = PageInfo.Builder(pageWidth, pageHeight, currentPageNumber).create()
                 myPage = pdfDocument.startPage(mypageInfo)
-                canvas = myPage.getCanvas()
+                canvas = myPage.canvas
             }
 
             canvas.drawText(l, xPosition, yPosition, title)

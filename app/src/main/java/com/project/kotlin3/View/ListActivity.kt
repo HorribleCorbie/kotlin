@@ -199,7 +199,7 @@ class ListActivity : AppCompatActivity() {
 
     fun saveUsers() {
         val users = UserRepository.getLikedUsers()
-        users.isEmpty()?.let {
+        users.isEmpty().let {
             if (!it) {
                 val set: Set<String> = users.map { it.name }.toSet()
                 settings!!.edit { putStringSet(PREF_NAME, set) }
